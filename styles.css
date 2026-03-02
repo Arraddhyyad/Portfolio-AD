@@ -109,7 +109,7 @@ img {
 .profile-image-wrapper {
     flex: 0 0 auto;
     width: 380px;
-    height: 580px;
+    height: 540px;
     overflow: hidden;
     border-radius: 24px 0 0 24px;
     border: 1px solid var(--gray-700);
@@ -132,7 +132,7 @@ img {
     padding: 48px 32px;
     transition: var(--transition-smooth);
     position: relative;
-    height: 580px;
+    height: 540px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -172,6 +172,7 @@ img {
     color: var(--gray-400);
     letter-spacing: 0.05em;
     text-transform: uppercase;
+    white-space: nowrap;
 }
 
 .profile-body {
@@ -453,6 +454,12 @@ img {
     flex-direction: column;
     gap: 24px;
     z-index: 100;
+    background: rgba(10, 10, 15, 0.55);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    padding: 16px 10px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .social-icon {
@@ -625,6 +632,7 @@ img {
     letter-spacing: 0.1em;
     text-transform: uppercase;
     width: fit-content;
+    white-space: nowrap;
     background: rgba(139, 92, 246, 0.05);
 }
 
@@ -1115,7 +1123,7 @@ img {
 
 .projects-section {
     padding-bottom: 200px;
-    overflow: hidden;
+    overflow: visible;
 }
 
 .projects-scroll-wrapper {
@@ -1127,7 +1135,9 @@ img {
     display: flex;
     gap: 48px;
     padding: 48px;
+    padding-bottom: 80px;
     will-change: transform;
+    align-items: flex-start;
 }
 
 .project-card {
@@ -1135,7 +1145,7 @@ img {
     background: var(--black);
     border: 1px solid var(--gray-800);
     border-radius: 16px;
-    overflow: hidden;
+   
     transition: var(--transition-smooth);
 }
 
@@ -1179,6 +1189,7 @@ img {
 
 .project-info {
     padding: 40px;
+    padding-bottom: 56px;
 }
 
 .project-title {

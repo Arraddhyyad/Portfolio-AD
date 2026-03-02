@@ -275,12 +275,12 @@ class PortfolioApp {
                 const targetSection = document.querySelector(targetId);
                 
                 if (targetSection) {
-                    const offsetTop = targetSection.offsetTop - 80;
+                    const y = window.scrollY + targetSection.getBoundingClientRect().top - 80;
                     window.scrollTo({
-                        top: offsetTop,
+                        top: y,
                         behavior: 'smooth'
                     });
-                    
+
                     // Update active state
                     navLinks.forEach(l => l.classList.remove('active'));
                     link.classList.add('active');
@@ -290,15 +290,20 @@ class PortfolioApp {
 
         // Update active nav on scroll
         window.addEventListener('scroll', () => {
-            let current = '';
-            
-            sections.forEach(section => {
-                const sectionTop = section.offsetTop - 200;
-                
-                if (window.pageYOffset >= sectionTop) {
-                    current = section.getAttribute('id');
-                }
-            });
+    let current = '';
+
+    const scrollPosition = window.scrollY + window.innerHeight / 3;
+
+    sections.forEach(section => {
+        const rect = section.getBoundingClientRect();
+        const sectionTop = window.scrollY + rect.top;
+        const sectionBottom = sectionTop + section.offsetHeight;
+
+        if (scrollPosition >= sectionTop && scrollPosition < sectionBottom) {
+            current = section.getAttribute('id');
+        }
+    });
+
             
             navLinks.forEach(link => {
                 link.classList.remove('active');
@@ -415,7 +420,7 @@ class PortfolioApp {
             gsap.fromTo(projectCards, 
                 {
                     opacity: 0,
-                    x: 100
+                    x: 50
                 },
                 {
                     opacity: 1,
@@ -431,37 +436,77 @@ class PortfolioApp {
                 }
             );
 
-            // Calculate scroll amount - ensure it's a valid number
-            const getScrollAmount = () => {
-                const containerWidth = scrollContainer.scrollWidth;
-                const viewportWidth = window.innerWidth;
-                const scrollDistance = containerWidth - viewportWidth;
+//             // Calculate scroll amount - ensure it's a valid number
+//             const getScrollAmount = () => {
+//                 const containerWidth = scrollContainer.scrollWidth;
+//                 const viewportWidth = window.innerWidth;
+//                 const scrollDistance = Math.round(containerWidth - viewportWidth) + 100;
                 
-                // Return negative value for leftward scroll, ensure it's not zero
-                return scrollDistance > 0 ? -scrollDistance : -100;
-            };
+//                 // Return negative value for leftward scroll, ensure it's not zero
+//                 return scrollDistance > 0 ? -scrollDistance : -100;
+//             };
 
-            // Pin section and scroll horizontally
-            gsap.to(scrollContainer, {
-                x: getScrollAmount,
-                ease: 'none',
-                scrollTrigger: {
-                    trigger: projectsSection,
-                    start: 'center center',
-                    end: () => {
-                        const amount = Math.abs(getScrollAmount());
-                        return `+=${amount + window.innerHeight * 0.5}`;
-                    },
-                    scrub: 1,
-                    pin: true,
-                    anticipatePin: 1,
-                    invalidateOnRefresh: true,
-                    onUpdate: (self) => {
-                        // Debug: log scroll progress
-                        // console.log('Scroll progress:', self.progress);
-                    }
-                }
-            });
+//             // Pin section and scroll horizontally
+//             gsap.to(scrollContainer, {
+//                 x: getScrollAmount,
+//                 ease: 'none',
+//                 scrollTrigger: {
+//                     trigger: projectsSection,
+//                     start: 'center center',
+//                    end: () => `+=${Math.abs(getScrollAmount()) + window.innerHeight * 0.5}`,
+
+//                     scrub: 1,
+// pin: true,
+// anticipatePin: 1,
+// pinSpacing: true,
+// invalidateOnRefresh: true,
+//                     onUpdate: (self) => {
+//                         // Debug: log scroll progress
+//                         // console.log('Scroll progress:', self.progress);
+//                     }
+//                 }
+//             });
+
+// Lock container width and force GPU layer BEFORE pin to prevent reflow during scrub
+scrollContainer.style.width = scrollContainer.scrollWidth + 'px';
+scrollContainer.style.willChange = 'transform';
+scrollContainer.style.backfaceVisibility = 'hidden';
+
+// Cache scroll amount once; invalidateOnRefresh recalculates on resize
+let cachedScrollAmount = null;
+
+const getScrollAmount = () => {
+    if (cachedScrollAmount !== null) return cachedScrollAmount;
+    const containerWidth = scrollContainer.scrollWidth;
+    const viewportWidth = window.innerWidth;
+    const scrollDistance = Math.round(containerWidth - viewportWidth) + 100;
+    cachedScrollAmount = scrollDistance > 0 ? -scrollDistance : -100;
+    return cachedScrollAmount;
+};
+
+// Pin section and scroll horizontally
+gsap.to(scrollContainer, {
+    x: getScrollAmount,
+    ease: 'none',
+    scrollTrigger: {
+        trigger: projectsSection,
+        start: 'center center',
+        end: () => `+=${Math.abs(getScrollAmount()) + window.innerHeight * 0.5}`,
+        scrub: 1,
+        pin: true,
+        anticipatePin: 1,
+        pinSpacing: true,
+        invalidateOnRefresh: true,
+       onRefresh: () => {
+    cachedScrollAmount = null;
+    scrollContainer.style.width = 'max-content';
+    requestAnimationFrame(() => {
+        scrollContainer.style.width = scrollContainer.scrollWidth + 'px';
+    });
+}
+    }
+});
+
         };
 
         // Execute after window loads
